@@ -55,6 +55,11 @@ class Model(nn.Module):
                 configs.enc_in * configs.seq_len, configs.num_class)
 
     def encoder(self, x):
+        means = x.mean(1, keepdim=True).detach()
+        x = x - means
+        stdev = torch.sqrt(torch.var(x, dim=1, keepdim=True, unbiased=False) + 1e-5)
+        x /= stdev
+        
         seasonal_init, trend_init = self.decompsition(x)
         seasonal_init, trend_init = seasonal_init.permute(
             0, 2, 1), trend_init.permute(0, 2, 1)
@@ -72,7 +77,10 @@ class Model(nn.Module):
             seasonal_output = self.Linear_Seasonal(seasonal_init)
             trend_output = self.Linear_Trend(trend_init)
         x = seasonal_output + trend_output
-        return x.permute(0, 2, 1)
+        x = x.permute(0, 2, 1)
+        x = x * (stdev[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
+        x = x + (means[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
+        return x
 
     def forecast(self, x_enc):
         # Encoder

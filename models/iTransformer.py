@@ -58,6 +58,7 @@ class Model(nn.Module):
         _, _, N = x_enc.shape
 
         # Embedding
+        x_mark_enc = None
         enc_out = self.enc_embedding(x_enc, x_mark_enc)
         enc_out, attns = self.encoder(enc_out, attn_mask=None)
 
