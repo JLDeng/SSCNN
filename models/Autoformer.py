@@ -106,7 +106,8 @@ class Model(nn.Module):
         seasonal_part, trend_part = self.decoder(dec_out, enc_out, x_mask=None, cross_mask=None,
                                                  trend=trend_init)
         # final
-        dec_out = trend_part + seasonal_part
+        dec_out = (trend_part + seasonal_part)[:, -self.pred_len:]
+        
         return dec_out
 
     def imputation(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask):

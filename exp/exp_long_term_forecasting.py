@@ -9,6 +9,8 @@ import os
 import time
 import warnings
 import numpy as np
+from thop import profile, clever_format
+
 
 warnings.filterwarnings('ignore')
 
@@ -21,7 +23,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         model = self.model_dict[self.args.model].Model(self.args).float()
 
         if self.args.use_multi_gpu and self.args.use_gpu:
-            model = nn.DataParallel(model, device_ids=self.args.device_ids)
+            model = nn.DataParallel(model)
         return model
 
     def _get_data(self, flag):
@@ -89,10 +91,9 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
         train_steps = len(train_loader)
         early_stopping = EarlyStopping(patience=self.args.patience, verbose=True)
-
         model_optim = self._select_optimizer()
         criterion = self._select_criterion()
-
+        
         if self.args.use_amp:
             scaler = torch.cuda.amp.GradScaler()
 
@@ -114,7 +115,10 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 # decoder input
                 dec_inp = torch.zeros_like(batch_y[:, -self.args.pred_len:, :]).float()
                 dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
-
+                #macs, params = profile(self.model, inputs=(batch_x, batch_x_mark, dec_inp, batch_y_mark))
+                #macs, params = clever_format([macs, params], "%.3f")
+                #print(macs, params)
+                #exit()
                 # encoder - decoder
                 if self.args.use_amp:
                     with torch.cuda.amp.autocast():
