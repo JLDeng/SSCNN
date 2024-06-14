@@ -1,15 +1,15 @@
-export CUDA_VISIBLE_DEVICES=3
+export CUDA_VISIBLE_DEVICES=0
 
-model_name=HDformer
+model_name=SSCNN
 
 python -u my_run.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
-  --data_path ETTh2.csv \
-  --model_id ETTh2_168_3 \
+  --data_path ETTh1.csv \
+  --model_id ETTh1_168_3 \
   --model $model_name \
-  --data ETTh2 \
+  --data ETTh1 \
   --features M \
   --seq_len 168 \
   --label_len 48 \
@@ -17,9 +17,10 @@ python -u my_run.py \
   --cycle_len 24 \
   --short_period_len 8 \
   --kernel_size 2 \
-  --e_layers 1 \
+  --e_layers 2 \
   --d_layers 1 \
   --factor 3 \
+  --spatial 0 \
   --enc_in 7 \
   --dec_in 7 \
   --c_out 7 \
@@ -36,10 +37,10 @@ python -u my_run.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
-  --data_path ETTh2.csv \
-  --model_id ETTh2_168_24 \
+  --data_path ETTh1.csv \
+  --model_id ETTh1_168_24 \
   --model $model_name \
-  --data ETTh2 \
+  --data ETTh1 \
   --features M \
   --seq_len 168 \
   --label_len 48 \
@@ -47,8 +48,9 @@ python -u my_run.py \
   --cycle_len 24 \
   --short_period_len 8 \
   --kernel_size 2 \
-  --e_layers 1 \
+  --e_layers 2 \
   --d_layers 1 \
+  --spatial 0 \
   --factor 3 \
   --enc_in 7 \
   --dec_in 7 \
@@ -66,10 +68,10 @@ python -u my_run.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
-  --data_path ETTh2.csv \
-  --model_id ETTh2_168_96 \
+  --data_path ETTh1.csv \
+  --model_id ETTh1_168_96 \
   --model $model_name \
-  --data ETTh2 \
+  --data ETTh1 \
   --features M \
   --seq_len 168 \
   --label_len 48 \
@@ -77,8 +79,9 @@ python -u my_run.py \
   --cycle_len 24 \
   --short_period_len 8 \
   --kernel_size 2 \
-  --e_layers 1 \
+  --e_layers 2 \
   --d_layers 1 \
+  --spatial 0 \
   --factor 3 \
   --enc_in 7 \
   --dec_in 7 \

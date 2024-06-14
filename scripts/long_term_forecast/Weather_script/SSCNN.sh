@@ -1,62 +1,32 @@
-export CUDA_VISIBLE_DEVICES=6
+export CUDA_VISIBLE_DEVICES=3
 
-model_name=HDformer
+model_name=SSCNN
 
 python -u my_run.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/traffic/ \
-  --data_path traffic.csv \
-  --model_id traffic_168_3 \
+  --root_path ./dataset/weather/ \
+  --data_path weather.csv \
+  --model_id weather_432_3 \
   --model $model_name \
   --data custom \
   --features M \
-  --seq_len 168 \
+  --seq_len 432 \
   --label_len 48 \
   --pred_len 3 \
-  --cycle_len 24 \
-  --short_period_len 8 \
-  --kernel_size 2 \
-  --e_layers 3 \
+  --cycle_len 144 \
+  --short_period_len 12 \
+  --kernel_size 3 \
+  --e_layers 2 \
+  --spatial 0 \
   --d_layers 1 \
   --factor 3 \
-  --enc_in 862 \
-  --dec_in 862 \
-  --c_out 862 \
+  --enc_in 21 \
+  --dec_in 21 \
+  --c_out 21 \
   --des 'Exp' \
   --d_model 8 \
-  --batch_size 4 \
-  --learning_rate 0.0005 \
-  --itr 1 \
-  --train_epoch 200 \
-  --patience 5 \
-  --lradj 'type3'
-
-
-python -u my_run.py \
-  --task_name long_term_forecast \
-  --is_training 1 \
-  --root_path ./dataset/traffic/ \
-  --data_path traffic.csv \
-  --model_id traffic_168_24 \
-  --model $model_name \
-  --data custom \
-  --features M \
-  --seq_len 168 \
-  --label_len 48 \
-  --pred_len 24 \
-  --cycle_len 24 \
-  --short_period_len 8 \
-  --kernel_size 2 \
-  --e_layers 3 \
-  --d_layers 1 \
-  --factor 3 \
-  --enc_in 862 \
-  --dec_in 862 \
-  --c_out 862 \
-  --des 'Exp' \
-  --d_model 8 \
-  --batch_size 4 \
+  --batch_size 8 \
   --learning_rate 0.0005 \
   --itr 1 \
   --train_epoch 200 \
@@ -66,27 +36,59 @@ python -u my_run.py \
 python -u my_run.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/traffic/ \
-  --data_path traffic.csv \
-  --model_id traffic_168_96 \
+  --root_path ./dataset/weather/ \
+  --data_path weather.csv \
+  --model_id weather_432_24 \
   --model $model_name \
   --data custom \
   --features M \
-  --seq_len 168 \
+  --seq_len 432 \
   --label_len 48 \
-  --pred_len 96 \
-  --cycle_len 24 \
-  --short_period_len 8 \
-  --kernel_size 2 \
-  --e_layers 3 \
+  --pred_len 24 \
+  --cycle_len 144 \
+  --short_period_len 12 \
+  --kernel_size 3 \
+  --e_layers 2 \
+  --spatial 0 \
   --d_layers 1 \
   --factor 3 \
-  --enc_in 862 \
-  --dec_in 862 \
-  --c_out 862 \
+  --enc_in 21 \
+  --dec_in 21 \
+  --c_out 21 \
   --des 'Exp' \
   --d_model 8 \
-  --batch_size 4 \
+  --batch_size 8 \
+  --learning_rate 0.0005 \
+  --itr 1 \
+  --train_epoch 200 \
+  --patience 5 \
+  --lradj 'type3'
+
+python -u my_run.py \
+  --task_name long_term_forecast \
+  --is_training 1 \
+  --root_path ./dataset/weather/ \
+  --data_path weather.csv \
+  --model_id weather_432_96 \
+  --model $model_name \
+  --data custom \
+  --features M \
+  --seq_len 432 \
+  --label_len 48 \
+  --pred_len 96 \
+  --cycle_len 144 \
+  --short_period_len 12 \
+  --kernel_size 3 \
+  --e_layers 2 \
+  --spatial 0 \
+  --d_layers 1 \
+  --factor 3 \
+  --enc_in 21 \
+  --dec_in 21 \
+  --c_out 21 \
+  --des 'Exp' \
+  --d_model 8 \
+  --batch_size 8 \
   --learning_rate 0.0005 \
   --itr 1 \
   --train_epoch 200 \

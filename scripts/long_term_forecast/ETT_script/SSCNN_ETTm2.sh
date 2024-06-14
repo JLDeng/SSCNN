@@ -1,93 +1,96 @@
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=5
 
-model_name=HDformer
+model_name=SSCNN
 
 python -u my_run.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/electricity/ \
-  --data_path electricity.csv \
-  --model_id ECL_168_3 \
+  --root_path ./dataset/ETT-small/ \
+  --data_path ETTm2.csv \
+  --model_id ETTm2_384_3 \
   --model $model_name \
-  --data custom \
+  --data ETTm2 \
   --features M \
-  --seq_len 168 \
+  --seq_len 384 \
   --label_len 48 \
   --pred_len 3 \
-  --cycle_len 24 \
+  --cycle_len 96 \
   --short_period_len 8 \
   --kernel_size 2 \
-  --e_layers 4 \
+  --e_layers 2 \
   --d_layers 1 \
+  --spatial 0 \
   --factor 3 \
-  --enc_in 321 \
-  --dec_in 321 \
-  --c_out 321 \
+  --enc_in 7 \
+  --dec_in 7 \
+  --c_out 7 \
   --des 'Exp' \
   --d_model 8 \
   --batch_size 8 \
   --learning_rate 0.0005 \
+  --lradj 'type3' \
   --itr 1 \
   --train_epoch 200 \
-  --patience 5 \
-  --lradj 'type3'
-  
+  --patience 5
+
 python -u my_run.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/electricity/ \
-  --data_path electricity.csv \
-  --model_id ECL_168_24 \
+  --root_path ./dataset/ETT-small/ \
+  --data_path ETTm2.csv \
+  --model_id ETTm2_384_24 \
   --model $model_name \
-  --data custom \
+  --data ETTm2 \
   --features M \
-  --seq_len 168 \
+  --seq_len 384 \
   --label_len 48 \
   --pred_len 24 \
-  --cycle_len 24 \
+  --cycle_len 96 \
   --short_period_len 8 \
   --kernel_size 2 \
-  --e_layers 4 \
+  --e_layers 2 \
   --d_layers 1 \
+  --spatial 0 \
   --factor 3 \
-  --enc_in 321 \
-  --dec_in 321 \
-  --c_out 321 \
+  --enc_in 7 \
+  --dec_in 7 \
+  --c_out 7 \
   --des 'Exp' \
   --d_model 8 \
   --batch_size 8 \
   --learning_rate 0.0005 \
+  --lradj 'type3' \
   --itr 1 \
   --train_epoch 200 \
-  --patience 5 \
-  --lradj 'type3'
-  
+  --patience 5
+
 python -u my_run.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/electricity/ \
-  --data_path electricity.csv \
-  --model_id ECL_168_96 \
+  --root_path ./dataset/ETT-small/ \
+  --data_path ETTm2.csv \
+  --model_id ETTm2_384_96 \
   --model $model_name \
-  --data custom \
+  --data ETTm2 \
   --features M \
-  --seq_len 168 \
+  --seq_len 384 \
   --label_len 48 \
   --pred_len 96 \
-  --cycle_len 24 \
+  --cycle_len 96 \
   --short_period_len 8 \
   --kernel_size 2 \
-  --e_layers 4 \
+  --e_layers 2 \
   --d_layers 1 \
+  --spatial 0 \
   --factor 3 \
-  --enc_in 321 \
-  --dec_in 321 \
-  --c_out 321 \
+  --enc_in 7 \
+  --dec_in 7 \
+  --c_out 7 \
   --des 'Exp' \
   --d_model 8 \
   --batch_size 8 \
   --learning_rate 0.0005 \
+  --lradj 'type3' \
   --itr 1 \
   --train_epoch 200 \
-  --patience 5 \
-  --lradj 'type3'
+  --patience 5

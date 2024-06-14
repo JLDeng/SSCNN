@@ -17,7 +17,6 @@ class SeasonalNorm(nn.Module):
     def __init__(self, cycle_len, cycle_num, d_model, series_num):
         super(SeasonalNorm, self).__init__()
         self.weight = Parameter(torch.randn(cycle_num, cycle_num))
-        self.register_buffer('running_var', torch.zeros(1, d_model, series_num, 1))
         self.cycle_len = cycle_len
     
     def forward(self, x):
@@ -35,9 +34,6 @@ class SeasonalNorm(nn.Module):
         norm_x = norm_x_cycle.reshape(b, c, n, t)
         mean = mean_cycle.reshape(b, -1, n, t)
         var = var_cycle.reshape(b, -1, n, t)
-        if self.training:
-            self.running_var = var.mean((0, 3), keepdim=True) * 0.05 + self.running_var * 0.95
-        var = var - self.running_var.detach()
         
         return norm_x, mean, var
     
