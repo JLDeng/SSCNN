@@ -12,3 +12,18 @@ Welcome to the official repository of the SSCNN paper: [Parsimony or Capability?
   year={2024}
 }
 ```
+
+## Acknowledgement
+
+We extend our heartfelt appreciation to the following GitHub repositories for providing valuable code bases and datasets:
+
+https://github.com/lss-1138/SegRNN
+https://github.com/VEWOXIC/FITS
+https://github.com/yuqinie98/patchtst
+https://github.com/cure-lab/LTSF-Linear
+https://github.com/zhouhaoyi/Informer2020
+https://github.com/thuml/Autoformer
+https://github.com/MAZiqing/FEDformer
+https://github.com/alipay/Pyraformer
+https://github.com/ts-kim/RevIN
+https://github.com/timeseriesAI/tsai
