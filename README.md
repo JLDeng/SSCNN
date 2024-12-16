@@ -20,7 +20,7 @@ All the datasets needed for SSCNN can be obtained from the Google Drive provided
 ### Training Example
 You can specify separate scripts to run independent tasks, such as obtaining results on etth1:
 ```
-sh scripts/SparseTSF/etth1.sh
+sh scripts/SSCNN/etth1.sh
 ```
 
 ## Citation
