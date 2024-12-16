@@ -2,6 +2,8 @@
 
 Welcome to the official repository of the SSCNN paper: [Parsimony or Capability? Decomposition Delivers Both in Long-term Time Series Forecasting](https://openreview.net/pdf?id=wiEHZSV15I).
 
+[[Poster]](https://nips.cc/media/PosterPDFs/NeurIPS%202024/93133.png?t=1730630856.8418543)
+
 ## Citation
 
 ```
