@@ -9,6 +9,10 @@ import os
 import time
 import warnings
 import numpy as np
+<<<<<<< HEAD
+=======
+from thop import profile, clever_format
+>>>>>>> 6e877149e058c23588cb9c2e2289b485c2395172
 import torch.nn.functional as F
 
 
