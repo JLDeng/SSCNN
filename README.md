@@ -8,6 +8,8 @@ Welcome to the official repository of the SSCNN paper: [Parsimony or Capability?
 
 We found that the connection layout of the four normalization blocks at each layer impacts the results slightly, leaving a small performance gap. We implement both series and parallel connection between them in the code. It is recommended to try each of these two types of connection to obtain the optimal outcome, which can be done by specifying "connection" to "series" or "parallel" before running the script.
 
+Each normalization block or attention operation can be easily enabled or disabled by specifying the corresponding paraemter to 1 or 0.
+
 ## Getting Started
 
 ### Environment Requirements
