@@ -22,7 +22,7 @@ pip install -r requirements.txt
 All the datasets needed for SSCNN can be obtained from the Google Drive provided in Autoformer. Create a separate folder named ./dataset and place all the CSV files in this directory. Note: Place the CSV files directly into this directory, such as "./dataset/ETTh1.csv"
 
 ### Training Example
-You can specify separate scripts to run independent tasks, such as obtaining results on etth1:
+You can specify separate scripts to run independent tasks, such as obtaining results on electricity:
 ```
 sh scripts/long_term_forecast/ECL_script/SSCNN.sh
 ```
