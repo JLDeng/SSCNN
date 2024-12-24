@@ -20,8 +20,9 @@ All the datasets needed for SSCNN can be obtained from the Google Drive provided
 ### Training Example
 You can specify separate scripts to run independent tasks, such as obtaining results on etth1:
 ```
-sh scripts/SSCNN/etth1.sh
+sh scripts/long_term_forecast/ECL_script/SSCNN.sh
 ```
+[!NOTE] We keep a constant learning rate over the course of training. So we remove the execution of "adjust_learning_rate" at the end of each epoch implemeted by Time-Series-Library. This is critical to the success of reproducing the reported outcome.
 
 ## Citation
 
