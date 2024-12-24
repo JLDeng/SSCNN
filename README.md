@@ -6,9 +6,9 @@ Welcome to the official repository of the SSCNN paper: [Parsimony or Capability?
 
 ## Model Implementation
 
-We found that the connection layout of the four normalization blocks at each layer impacts the results slightly, leaving a small performance gap. We implement both series and parallel connection between them in the code. It is recommended to try each of these two types of connection to obtain the optimal outcome, which can be done by specifying "connection" to "series" or "parallel" before running the script.
+SSCNN’s performance can be influenced by the connection layout of the four normalization blocks at each layer. We provide two connection strategies: **series** and **parallel**. Specify the desired connection by setting the `connection` parameter to `"series"` or `"parallel"` in the script.
 
-Each normalization block or attention operation can be easily enabled or disabled by specifying the corresponding paraemter to 1 or 0.
+Each normalization block or attention operation can also be enabled or disabled by setting its respective parameter to `1` (enabled) or `0` (disabled), providing flexibility for experimentation.
 
 ## Getting Started
 
@@ -29,7 +29,7 @@ You can specify separate scripts to run independent tasks, such as obtaining res
 sh scripts/long_term_forecast/ECL_script/SSCNN.sh
 ```
 > [!NOTE]
-> We keep a constant learning rate over the course of training. So we remove the execution of "adjust_learning_rate" at the end of each epoch implemeted by Time-Series-Library. This is critical to the success of reproducing the reported outcome. In addition, we currently follow the default configuration of learning rate, i.e., 0.0005, by Time-Series-Library, but it is encouraged to increase the learning rate to accelerate the convergence.
+> We maintain a constant learning rate throughout training. Therefore, the adjust_learning_rate function from Time-Series-Library is omitted. This adjustment is critical for reproducing the reported outcomes. The default learning rate is set to 0.0005 (as per Time-Series-Library), but increasing it may help accelerate convergence.
 
 ## Citation
 
