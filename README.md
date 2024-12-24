@@ -4,6 +4,10 @@ Welcome to the official repository of the SSCNN paper: [Parsimony or Capability?
 
 [[Poster]](https://nips.cc/media/PosterPDFs/NeurIPS%202024/93133.png?t=1730630856.8418543)
 
+## Model Implementation
+
+We found that the connection layout of the four normalization blocks at each layer impacts the results slightly, leaving a small performance gap. We implement both series and parallel connection between them in the code. It is recommended to try each of these two types of connection to obtain the optimal outcome.
+
 ## Getting Started
 
 ### Environment Requirements
