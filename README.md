@@ -23,7 +23,7 @@ You can specify separate scripts to run independent tasks, such as obtaining res
 sh scripts/long_term_forecast/ECL_script/SSCNN.sh
 ```
 > [!NOTE]
-> We keep a constant learning rate over the course of training. So we remove the execution of "adjust_learning_rate" at the end of each epoch implemeted by Time-Series-Library. This is critical to the success of reproducing the reported outcome.
+> We keep a constant learning rate over the course of training. So we remove the execution of "adjust_learning_rate" at the end of each epoch implemeted by Time-Series-Library. This is critical to the success of reproducing the reported outcome. In addition, we currently follow the default configuration by Time-Series-Library, but it is encouraged to increase the learning rate to accelerate the convergence.
 
 ## Citation
 
