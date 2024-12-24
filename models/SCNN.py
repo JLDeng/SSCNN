@@ -154,8 +154,8 @@ class EncoderLayer(nn.Module):
         x = torch.cat(xs, dim=1)        
         x = F.pad(x, mode='constant', pad=(self.kernel_size-1, 0))
 
-        x_1 = self.conv_1(x)
-        x_2 = self.conv_2(x)
+        x_1 = torch.tanh(self.conv_1(x))
+        x_2 = torch.sigmoid(self.conv_2(x))
         
         x_z = (x_1 * x_2)[..., :-self.pred_len]
         pred_z = (x_1 * x_2)[..., -self.pred_len:]
@@ -180,9 +180,9 @@ class Model(nn.Module):
         self.e_layers = configs.e_layers
         for i in range(configs.e_layers):
             self.enc_layers.append(EncoderLayer(configs.d_model, configs.seq_len, configs.pred_len, configs.cycle_len, configs.short_period_len, configs.enc_in, configs.kernel_size, dropout=0.1))
-        self.end_conv = nn.Conv1d(in_channels=configs.d_model * configs.pred_len,
-                                  groups=configs.pred_len,
-                                  out_channels=configs.pred_len,
+        self.end_conv = nn.Conv1d(in_channels=self.pred_len * configs.d_model,
+                                  out_channels=self.pred_len,
+                                  groups=self.pred_len,
                                   kernel_size=1,
                                   bias=True)
 
@@ -206,12 +206,13 @@ class Model(nn.Module):
             x, s = self.enc_layers[i](x)
             x = x + residual
             out = s + out
-        dec_out = self.end_conv(out.permute(0, 3, 1, 2).reshape(b, -1, n))
+        out = out.permute(0, 3, 1, 2).reshape(b, -1, n)
+        dec_out = self.end_conv(out)
         
         dec_out = dec_out * (stdev[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
         dec_out = dec_out + (means[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
         return dec_out
-
+        
     def load_my_state_dict(self, state_dict):
         own_state = self.state_dict()
         for name, param in state_dict.items():

@@ -6,6 +6,7 @@ import re
 import torch
 from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
 from utils.timefeatures import time_features
 from data_provider.m4 import M4Dataset, M4Meta
 from data_provider.uea import subsample, interpolate_missing, Normalizer
@@ -13,6 +14,7 @@ from sktime.datasets import load_from_tsfile_to_dataframe
 import warnings
 
 warnings.filterwarnings('ignore')
+
 
 
 class Dataset_ETT_hour(Dataset):
@@ -101,6 +103,145 @@ class Dataset_ETT_hour(Dataset):
 
     def inverse_transform(self, data):
         return self.scaler.inverse_transform(data)
+
+
+class Dataset_PEMS_minute(Dataset):
+    def __init__(self, root_path, flag='train', size=None,
+                 features='S', data_path='.csv',
+                 target='speed', scale=True, timeenc=0, freq='t', seasonal_patterns=None):
+        # size [seq_len, label_len, pred_len]
+        # info
+        if size == None:
+            self.seq_len = 24 * 4 * 4
+            self.label_len = 24 * 4
+            self.pred_len = 24 * 4
+        else:
+            self.seq_len = size[0]
+            self.label_len = size[1]
+            self.pred_len = size[2]
+        # init
+        assert flag in ['train', 'test', 'val']
+        type_map = {'train': 0, 'val': 1, 'test': 2}
+        self.set_type = type_map[flag]
+
+        self.features = features
+        self.target = target
+        self.scale = scale
+        self.timeenc = timeenc
+        self.freq = freq
+
+        self.root_path = root_path
+        self.data_path = data_path
+        self.__read_data__()
+
+    def __read_data__(self):
+        self.target_scaler = StandardScaler()
+        self.scaler = StandardScaler()
+        self.raw_data_dict = {}
+        self.processed_data_dict = {}
+        for filename in os.listdir(self.root_path):
+            data_raw = pd.read_csv(os.path.join(self.root_path, filename))
+            df_stamp = data_raw[['Timestamp']]
+            cols_data = data_raw.columns[1:]
+            data = data_raw[cols_data]
+            data.interpolate(inplace=True)
+            self.raw_data_dict[filename[:-4]] = data
+            data_len = len(data)
+        
+        
+        
+        num_train = int(data_len * 0.7)
+        num_test = int(data_len * 0.2)
+        num_vali = data_len - num_train - num_test
+        
+        target_attribute_dict = {'speed': 'Avg Speed', 'density': 'Avg Occupancy', 'flow': 'Total Flow'}
+        intra_attributes = ['Avg Speed', 'Avg Occupancy', 'Total Flow']
+        target_attribute = target_attribute_dict[self.target]
+
+        border1s = [0, num_train - self.seq_len, data_len - num_test - self.seq_len]
+        border2s = [num_train, num_train + num_vali, data_len]
+        border1 = border1s[self.set_type]
+        border2 = border2s[self.set_type]
+        
+        if self.scale:
+            for attribute, data in self.raw_data_dict.items():
+                train_data = data[border1s[0]:border2s[0]]
+                if attribute == target_attribute:
+                    self.target_scaler.fit(train_data.values.reshape(-1, 1))
+                #local_scaled = self.scaler.fit_transform(data.values.transpose((1, 0))).transpose((1, 0))
+                #self.processed_data_dict['Temporal Local ' + attribute] = local_scaled
+                #self.processed_data_dict['Temporal Mean ' + attribute] = np.tile(self.scaler.mean_, (local_scaled.shape[1], 1)).transpose((1, 0))
+                #self.processed_data_dict['Temporal Scale ' + attribute] = np.tile(self.scaler.scale_, (local_scaled.shape[1], 1)).transpose((1, 0))
+                #if attribute in intra_attributes:
+                print(attribute)
+                self.scaler.fit(train_data.values.reshape(-1, train_data.shape[1]))
+                local_scaled = self.scaler.transform(data.values.reshape(-1, data.shape[1])).reshape((-1, data.shape[1]))
+                self.processed_data_dict['Local ' + attribute] = local_scaled
+                self.processed_data_dict['Mean ' + attribute] = np.tile(self.scaler.mean_, (local_scaled.shape[0], 1))
+                self.processed_data_dict['Scale ' + attribute] = np.tile(self.scaler.scale_, (local_scaled.shape[0], 1))
+                self.scaler.fit(train_data.values.reshape(-1, 1))
+                global_scaled = self.scaler.transform(data.values.reshape(-1, 1)).reshape((-1, data.shape[1]))
+                self.processed_data_dict['Global ' + attribute] = global_scaled
+        else:
+            speed_data = speed_data.values
+            flow_data = flow_data.values
+            density_data = density_data.values
+        df_stamp = df_stamp[border1:border2]
+        df_stamp['date'] = pd.to_datetime(df_stamp.Timestamp)
+        if self.timeenc == 0:
+            df_stamp['month'] = df_stamp.date.apply(lambda row: row.month, 1)
+            df_stamp['day'] = df_stamp.date.apply(lambda row: row.day, 1)
+            df_stamp['weekday'] = df_stamp.date.apply(lambda row: row.weekday(), 1)
+            df_stamp['hour'] = df_stamp.date.apply(lambda row: row.hour, 1)
+            df_stamp['minute'] = df_stamp.date.apply(lambda row: row.minute // 5 + row.hour * 12, 1)
+            #df_stamp['minute'] = df_stamp.minute.map(lambda x: x // 15)
+            data_stamp = df_stamp.drop(['date', 'Timestamp'], 1).values
+        elif self.timeenc == 1:
+            data_stamp = time_features(pd.to_datetime(df_stamp['date'].values), freq=self.freq)
+            data_stamp = data_stamp.transpose(1, 0)
+        self.data_x_dict = {}
+        self.data_y_dict = {}
+        for attribute, data in self.processed_data_dict.items():
+            self.data_x_dict[attribute] = data[border1:border2]
+            self.data_y_dict[attribute] = data[border1:border2]
+        self.data_stamp = data_stamp
+
+    def __getitem__(self, index):
+        s_begin = index
+        s_end = s_begin + self.seq_len
+        r_begin = s_end - self.label_len
+        r_end = r_begin + self.label_len + self.pred_len
+        
+        ori_attributes = ['Global Avg Speed', 'Global Avg Occupancy', 'Global Total Flow']
+        target_attribute_dict = {'speed': 'Global Avg Speed', 'density': 'Global Avg Occupancy', 'flow': 'Global Total Flow'}
+        target_attribute = target_attribute_dict[self.target]
+        for attribute, data in self.data_x_dict.items():
+            if attribute == target_attribute:
+                target_seq_x = data[s_begin:s_end]
+                seq_y = data[r_begin:r_end]
+        ori_seq_x = []
+        aux_seq_x = []
+        for attribute, data in self.data_x_dict.items():
+            if attribute in ori_attributes and attribute != target_attribute:
+                ori_seq_x.append(data[s_begin:s_end])
+        for attribute, data in self.data_x_dict.items():
+            if attribute not in ori_attributes and ('Local' in attribute or 'Global' in attribute):
+                aux_seq_x.append(data[s_begin:s_end])
+        for attribute, data in self.data_x_dict.items():
+            if attribute not in ori_attributes and 'Local' not in attribute and 'Global' not in attribute:
+                aux_seq_x.append(data[s_begin:s_end])
+        seq_x = np.stack([target_seq_x] + ori_seq_x+aux_seq_x, axis=0)
+        
+        seq_x_mark = self.data_stamp[s_begin:s_end]
+        seq_y_mark = self.data_stamp[r_begin:r_end]
+        
+        return seq_x, seq_y, seq_x_mark, seq_y_mark
+
+    def __len__(self):
+        return len(self.data_x_dict['Global Avg Speed']) - self.seq_len - self.pred_len + 1
+
+    def inverse_transform(self, data):
+        return self.target_scaler.inverse_transform(data)
 
 
 class Dataset_ETT_minute(Dataset):
@@ -252,9 +393,12 @@ class Dataset_Custom(Dataset):
             train_data = df_data[border1s[0]:border2s[0]]
             self.scaler.fit(train_data.values)
             data = self.scaler.transform(df_data.values)
+            train_data = self.scaler.transform(train_data.values)
         else:
             data = df_data.values
+        
 
+        
         df_stamp = df_raw[['date']][border1:border2]
         df_stamp['date'] = pd.to_datetime(df_stamp.date)
         if self.timeenc == 0:
@@ -266,7 +410,6 @@ class Dataset_Custom(Dataset):
         elif self.timeenc == 1:
             data_stamp = time_features(pd.to_datetime(df_stamp['date'].values), freq=self.freq)
             data_stamp = data_stamp.transpose(1, 0)
-
         self.data_x = data[border1:border2]
         self.data_y = data[border1:border2]
         self.data_stamp = data_stamp
@@ -276,7 +419,7 @@ class Dataset_Custom(Dataset):
         s_end = s_begin + self.seq_len
         r_begin = s_end - self.label_len
         r_end = r_begin + self.label_len + self.pred_len
-
+        
         seq_x = self.data_x[s_begin:s_end]
         seq_y = self.data_y[r_begin:r_end]
         seq_x_mark = self.data_stamp[s_begin:s_end]

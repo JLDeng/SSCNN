@@ -2,28 +2,23 @@ import argparse
 import os
 import torch
 from exp.exp_long_term_forecasting import Exp_Long_Term_Forecast
-from exp.exp_imputation import Exp_Imputation
-from exp.exp_short_term_forecasting import Exp_Short_Term_Forecast
-from exp.exp_anomaly_detection import Exp_Anomaly_Detection
-from exp.exp_classification import Exp_Classification
 import random
 import numpy as np
 
 if __name__ == '__main__':
-    fix_seed = 2021
+    fix_seed = 2023
     random.seed(fix_seed)
     torch.manual_seed(fix_seed)
     np.random.seed(fix_seed)
 
-    parser = argparse.ArgumentParser(description='TimesNet')
+    parser = argparse.ArgumentParser(description='SSCNN')
 
     # basic config
-    parser.add_argument('--task_name', type=str, required=True, default='long_term_forecast',
-                        help='task name, options:[long_term_forecast, short_term_forecast, imputation, classification, anomaly_detection]')
+    parser.add_argument('--task_name', type=str, required=True, default='long_term_forecast')
     parser.add_argument('--is_training', type=int, required=True, default=1, help='status')
     parser.add_argument('--model_id', type=str, required=True, default='test', help='model id')
-    parser.add_argument('--model', type=str, required=True, default='Autoformer',
-                        help='model name, options: [Autoformer, Transformer, TimesNet]')
+    parser.add_argument('--model', type=str, required=True, default='SSCNN',
+                        help='model name, options: [SSCNN, SCNN]')
 
     # data loader
     parser.add_argument('--data', type=str, required=True, default='ETTm1', help='dataset type')
@@ -40,8 +35,6 @@ if __name__ == '__main__':
     parser.add_argument('--seq_len', type=int, default=96, help='input sequence length')
     parser.add_argument('--label_len', type=int, default=48, help='start token length')
     parser.add_argument('--pred_len', type=int, default=96, help='prediction sequence length')
-    parser.add_argument('--lookback_len', type=int, default=1, help='Lookback sequence length')
-    parser.add_argument('--ext', type=int, default=1, help='enable extrapolation')
     parser.add_argument('--seasonal_patterns', type=str, default='Monthly', help='subset for M4')
     parser.add_argument('--inverse', action='store_true', help='inverse output data', default=False)
 
@@ -62,15 +55,13 @@ if __name__ == '__main__':
     parser.add_argument('--c_out', type=int, default=7, help='output size')
     parser.add_argument('--d_model', type=int, default=8, help='dimension of model')
     parser.add_argument('--e_layers', type=int, default=2, help='num of encoder layers')
-    parser.add_argument('--d_layers', type=int, default=1, help='num of decoder layers')
     parser.add_argument('--long_term', type=int, default=1, help='enable long-term component')
     parser.add_argument('--seasonal', type=int, default=1, help='enable seasonal component')
     parser.add_argument('--short_term', type=int, default=1, help='enable short-term component')
+    parser.add_argument('--long_term_attn', type=int, default=1, help='enable long-term attention')
+    parser.add_argument('--seasonal_attn', type=int, default=1, help='enable seasonal attention')
+    parser.add_argument('--short_term_attn', type=int, default=1, help='enable short-term attention')
     parser.add_argument('--spatial', type=int, default=1, help='enable spatial component')
-    parser.add_argument('--factor', type=int, default=1, help='attn factor')
-    parser.add_argument('--distil', action='store_false',
-                        help='whether to use distilling in encoder, using this argument means not using distilling',
-                        default=True)
     parser.add_argument('--dropout', type=float, default=0.1, help='dropout')
     parser.add_argument('--embed', type=str, default='timeF',
                         help='time features encoding, options:[timeF, fixed, learned]')
@@ -113,23 +104,12 @@ if __name__ == '__main__':
     print('Args in experiment:')
     print(args)
 
-    if args.task_name == 'long_term_forecast':
-        Exp = Exp_Long_Term_Forecast
-    elif args.task_name == 'short_term_forecast':
-        Exp = Exp_Short_Term_Forecast
-    elif args.task_name == 'imputation':
-        Exp = Exp_Imputation
-    elif args.task_name == 'anomaly_detection':
-        Exp = Exp_Anomaly_Detection
-    elif args.task_name == 'classification':
-        Exp = Exp_Classification
-    else:
-        Exp = Exp_Long_Term_Forecast
+    Exp = Exp_Long_Term_Forecast
 
     if args.is_training:
         for ii in range(args.itr):
             # setting record of experiments
-            setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_ext{}_bl{}_dm{}_el{}_dl{}_fc{}_eb{}_dt{}_{}_lt{}_se{}_st{}_si{}_{}'.format(
+            setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_el{}_lt{}_se{}_st{}_si{}_lta{}_sea{}_sta{}_{}'.format(
                 args.task_name,
                 args.model_id,
                 args.model,
@@ -138,19 +118,15 @@ if __name__ == '__main__':
                 args.seq_len,
                 args.label_len,
                 args.pred_len,
-                args.ext,
-                args.lookback_len,
                 args.d_model,
                 args.e_layers,
-                args.d_layers,
-                args.factor,
-                args.embed,
-                args.distil,
-                args.des, 
                 args.long_term,
                 args.seasonal,
                 args.short_term,
-                args.spatial, ii,)
+                args.spatial, 
+                args.long_term_attn,
+                args.seasonal_attn,
+                args.short_term_attn, ii,)
 
             exp = Exp(args)  # set experiments
             print('>>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(setting))
@@ -161,30 +137,25 @@ if __name__ == '__main__':
             torch.cuda.empty_cache()
     else:
         ii = 0
-        setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_ext{}_bl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_dt{}_{}_lt{}_se{}_st{}_si{}_{}'.format(
-            args.task_name,
-            args.model_id,
-            args.model,
-            args.data,
-            args.features,
-            args.seq_len,
-            args.label_len,
-            args.pred_len,
-            args.ext,
-            args.lookback_len,
-            args.d_model,
-            args.n_heads,
-            args.e_layers,
-            args.d_layers,
-            args.d_ff,
-            args.factor,
-            args.embed,
-            args.distil,
-            args.des, 
-            args.long_term,
-            args.seasonal,
-            args.short_term,
-            args.spatial,ii)
+        setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_el{}_lt{}_se{}_st{}_si{}_{}'.format(
+                args.task_name,
+                args.model_id,
+                args.model,
+                args.data,
+                args.features,
+                args.seq_len,
+                args.label_len,
+                args.pred_len,
+                args.d_model,
+                args.e_layers,
+                args.d_layers,
+                args.long_term,
+                args.seasonal,
+                args.short_term,
+                args.spatial, 
+                args.long_term_attn,
+                args.seasonal_attn,
+                args.short_term_attn, ii,)
 
         exp = Exp(args)  # set experiments
         print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))

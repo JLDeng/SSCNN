@@ -1,15 +1,15 @@
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=5
 
-model_name=SCNN
+model_name=SSCNN
 
 python -u my_run.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
-  --data_path ETTm1.csv \
-  --model_id ETTm1_384_336 \
+  --data_path ETTm2.csv \
+  --model_id ETTm2_384_336 \
   --model $model_name \
-  --data ETTm1 \
+  --data ETTm2 \
   --features M \
   --seq_len 384 \
   --label_len 48 \
@@ -19,12 +19,14 @@ python -u my_run.py \
   --kernel_size 2 \
   --e_layers 2 \
   --d_layers 1 \
+  --spatial 0 \
+  --short_term 1 \
   --factor 3 \
   --enc_in 7 \
   --dec_in 7 \
   --c_out 7 \
   --des 'Exp' \
-  --d_model 4 \
+  --d_model 8 \
   --batch_size 8 \
   --learning_rate 0.0005 \
   --lradj 'type3' \
