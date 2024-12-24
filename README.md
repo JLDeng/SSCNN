@@ -6,7 +6,7 @@ Welcome to the official repository of the SSCNN paper: [Parsimony or Capability?
 
 ## Model Implementation
 
-We found that the connection layout of the four normalization blocks at each layer impacts the results slightly, leaving a small performance gap. We implement both series and parallel connection between them in the code. It is recommended to try each of these two types of connection to obtain the optimal outcome, which can be done by setting "connection" to "series" or "parallel" in the script.
+We found that the connection layout of the four normalization blocks at each layer impacts the results slightly, leaving a small performance gap. We implement both series and parallel connection between them in the code. It is recommended to try each of these two types of connection to obtain the optimal outcome, which can be done by specifying "connection" to "series" or "parallel" before running the script.
 
 ## Getting Started
 
